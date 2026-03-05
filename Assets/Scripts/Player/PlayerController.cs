@@ -17,8 +17,8 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float maxFallSpeed = 10f;
     [SerializeField] private float footStepDistance = 2f;
     [SerializeField] private AudioClip footStepAudio;
-    [SerializeField] private int hitcastFidelity = 4;
     [SerializeField] private EDirection currentGravity = EDirection.down;
+    [SerializeField] private LayerMask collisionMask;
     private Vector3 velocity;
     private Vector3 gravityDirection;
     private Vector3 moveDirection;
@@ -77,13 +77,14 @@ public class PlayerController : MonoBehaviour
         float input = move.ReadValue<float>();
         Acceleration(input);
         Friction(input);
-        Move();
         controller.Move(velocity * Time.fixedDeltaTime);
     }
 
     private void Jump()
     {
-        velocity += -gravityDirection * jumpStrength;
+        Vector3 verticalVelocity = Vector3.Dot(velocity, gravityDirection) * gravityDirection;
+        velocity -= verticalVelocity;
+        velocity -= gravityDirection * jumpStrength;
     }
 
     private void Gravity()
@@ -117,29 +118,14 @@ public class PlayerController : MonoBehaviour
         float moveSpeed = Vector3.Dot(velocity, moveDirection);
         if (moveSpeed > maxSpeed * Mathf.Abs(input) || moveSpeed < -maxSpeed * Mathf.Abs(input))
         {
-            float difference = moveSpeed - maxSpeed * input;
-            velocity -= Vector3.ClampMagnitude(moveDirection * difference, friction);
+            float difference = maxSpeed * input - moveSpeed;
+            velocity += Vector3.ClampMagnitude(moveDirection * difference, friction * Time.fixedDeltaTime);
         }
     }
-    private void Move()
-    {
-        if(velocity.z > 0)
-        {
-
-        }
-        if (velocity.z < 0)
-        {
-
-        }
-        if (velocity.y > 0)
-        {
-
-        }
-        if (velocity.y < 0)
-        {
-
-        }
-    }
+    //private bool CollisionCheck()
+    //{
+    //    return Physics.Raycast(transform.position + gravityDirection * (boxCollider.size.x / 2), gravityDirection, Vector3.Dot(velocity, gravityDirection) * Time.fixedDeltaTime, collisionMask);
+    //}
 
     public void ChangeGravityDirection(EDirection direction)
     {
