@@ -134,7 +134,7 @@ public class PlayerController : MonoBehaviour
         {
             case EDirection.up:
                 gravityDirection = new Vector3(0, 1, 0);
-                moveDirection = new Vector3(-1, 0, 0);
+                moveDirection = new Vector3(1, 0, 0);
                 break;
             case EDirection.down:
                 gravityDirection = new Vector3(0, -1, 0);
