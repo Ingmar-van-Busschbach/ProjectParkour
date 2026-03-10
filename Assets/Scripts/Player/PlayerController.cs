@@ -5,7 +5,6 @@ using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(CharacterController))]
 [RequireComponent(typeof(AudioSource))]
-[RequireComponent(typeof(BoxCollider))]
 public class PlayerController : MonoBehaviour
 {
     public enum EDirection { up, down, left, right }
@@ -19,14 +18,16 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private AudioClip footStepAudio;
     [SerializeField] private EDirection currentGravity = EDirection.down;
     [SerializeField] private LayerMask collisionMask;
+    [SerializeField] private GameObject modelObject;
+    [SerializeField] private float rotationSpeed = 1;
+    private Quaternion modelRotation;
+    private Vector3 spawnLocation;
     private Vector3 velocity;
     private Vector3 gravityDirection;
     private Vector3 moveDirection;
     private Vector3 lastFootstepPosition;
-    private Vector3 currentFootstepPosition;
     private CharacterController controller;
     private AudioSource audio;
-    private BoxCollider boxCollider;
     private InputSystem_Actions inputActions;
     private InputAction move;
     private InputAction jump;
@@ -37,9 +38,9 @@ public class PlayerController : MonoBehaviour
     {
         controller = GetComponent<CharacterController>();
         audio = GetComponent<AudioSource>();
-        boxCollider = GetComponent<BoxCollider>();
         inputActions = new InputSystem_Actions();
         lastFootstepPosition = transform.position;
+        spawnLocation = transform.position;
         ChangeGravityDirection(currentGravity);
     }
 
@@ -60,16 +61,20 @@ public class PlayerController : MonoBehaviour
     private void Update()
     {
         wantJump = jump.IsPressed();
+        //modelObject.transform.rotation = Quaternion.Lerp(transform.rotation, modelRotation, Time.deltaTime * rotationSpeed);
     }
 
     private void FixedUpdate()
     {
-        canJump = controller.isGrounded;
-        if(wantJump && canJump)
+        canJump = IsGrounded();
+        if (wantJump && canJump)
         {
             Jump();
         }
-        Gravity();
+        if (!canJump)
+        {
+            Gravity();
+        }
         if (controller.isGrounded)
         {
             CheckFootstep();
@@ -78,6 +83,13 @@ public class PlayerController : MonoBehaviour
         Acceleration(input);
         Friction(input);
         controller.Move(velocity * Time.fixedDeltaTime);
+    }
+
+    private bool IsGrounded()
+    {
+        Vector3 startposition = transform.position;
+        startposition += gravityDirection * (controller.radius + controller.skinWidth);
+        return Physics.Raycast(startposition, gravityDirection, 0.01f);
     }
 
     private void Jump()
@@ -105,7 +117,6 @@ public class PlayerController : MonoBehaviour
             lastFootstepPosition = transform.position;
             audio.PlayOneShot(footStepAudio);
         }
-        currentFootstepPosition = transform.position;
     }
 
     private void Acceleration(float input)
@@ -149,5 +160,13 @@ public class PlayerController : MonoBehaviour
                 moveDirection = new Vector3(0, 1, 0);
                 break;
         }
+        modelRotation = Quaternion.LookRotation(Vector3.forward, -gravityDirection);
+    }
+
+    public void Respawn()
+    {
+        controller.enabled = false;
+        transform.position = spawnLocation;
+        controller.enabled = true;
     }
 }
