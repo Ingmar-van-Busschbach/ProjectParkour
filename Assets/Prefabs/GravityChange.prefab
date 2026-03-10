@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 805821286425288640}
   - component: {fileID: 4119479498254135779}
   - component: {fileID: 7310353295787780390}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: GravityChange
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -89,7 +89,7 @@ public class PlayerController : MonoBehaviour
     {
         Vector3 startposition = transform.position;
         startposition += gravityDirection * (controller.radius + controller.skinWidth);
-        return Physics.Raycast(startposition, gravityDirection, 0.01f);
+        return Physics.Raycast(startposition, gravityDirection, 0.01f, collisionMask);
     }
 
     private void Jump()
